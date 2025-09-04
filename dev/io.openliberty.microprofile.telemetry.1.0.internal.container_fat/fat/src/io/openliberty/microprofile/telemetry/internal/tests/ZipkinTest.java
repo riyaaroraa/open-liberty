@@ -37,7 +37,6 @@ import org.junit.rules.RuleChain;
 import org.junit.runner.RunWith;
 
 import com.ibm.websphere.simplicity.ShrinkHelper;
-import com.ibm.websphere.simplicity.log.Log;
 
 import componenttest.annotation.Server;
 import componenttest.annotation.SkipForRepeat;
@@ -48,6 +47,7 @@ import componenttest.rules.repeater.MicroProfileActions;
 import componenttest.rules.repeater.RepeatTests;
 import componenttest.topology.impl.LibertyServer;
 import componenttest.topology.utils.HttpRequest;
+import io.jaegertracing.api_v2.Model.Log;
 import io.openliberty.microprofile.telemetry.internal.apps.spanTest.TestResource;
 import io.openliberty.microprofile.telemetry.internal.utils.TestConstants;
 import io.openliberty.microprofile.telemetry.internal.utils.zipkin.ZipkinContainer;
@@ -87,6 +87,7 @@ public class ZipkinTest {
         server.addEnvVar(TestConstants.ENV_OTEL_SERVICE_NAME, "Test service");
         server.addEnvVar(TestConstants.ENV_OTEL_BSP_SCHEDULE_DELAY, "100"); // Wait no more than 100ms to send traces to the server
         server.addEnvVar(TestConstants.ENV_OTEL_SDK_DISABLED, "false"); //Enable tracing
+        server.addEnvVar(TestConstants.ENV_OTEL_TRACES_SAMPLER, "always_on");
 
         // Construct the test application
         WebArchive spanTest = ShrinkWrap.create(WebArchive.class, "spanTest.war")
@@ -121,7 +122,7 @@ public class ZipkinTest {
 
     @Test
     @SkipForRepeat({ MicroProfileActions.MP60_ID, TelemetryActions.MP14_MPTEL11_ID, TelemetryActions.MP41_MPTEL11_ID, TelemetryActions.MP50_MPTEL11_ID,
-                     MicroProfileActions.MP61_ID, TelemetryActions.MP14_MPTEL21_ID, TelemetryActions.MP41_MPTEL21_ID, TelemetryActions.MP50_MPTEL21_ID})
+                     MicroProfileActions.MP61_ID, TelemetryActions.MP14_MPTEL21_ID, TelemetryActions.MP41_MPTEL21_ID, TelemetryActions.MP50_MPTEL21_ID })
     public void testBasicTelemetry2() throws Exception {
         HttpRequest request = new HttpRequest(server, "/spanTest");
         String traceId = request.run(String.class);
